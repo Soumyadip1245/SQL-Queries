@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SQL Interview Prep</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0d0f14;
+    --surface:  #13161e;
+    --surface2: #1a1e28;
+    --border:   #252a38;
+    --accent:   #4f8ef7;
+    --accent2:  #a78bfa;
+    --green:    #34d399;
+    --amber:    #fbbf24;
+    --red:      #f87171;
+    --cyan:     #22d3ee;
+    --text:     #e2e8f0;
+    --muted:    #64748b;
+    --comment:  #4a5568;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 1.2rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  header h1 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+
+  header span {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .layout {
+    display: flex;
+    min-height: calc(100vh - 57px);
+  }
+
+  .sidebar {
+    width: 220px;
+    min-width: 220px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 1.2rem 0;
+    position: sticky;
+    top: 57px;
+    height: calc(100vh - 57px);
+    overflow-y: auto;
+  }
+
+  .sidebar-section {
+    padding: 0.3rem 0;
+  }
+
+  .sidebar-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    padding: 0.5rem 1.2rem 0.3rem;
+    text-transform: uppercase;
+  }
+
+  .sidebar-item {
+    display: block;
+    padding: 0.45rem 1.2rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    cursor: pointer;
+    border-left: 2px solid transparent;
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .sidebar-item:hover { color: var(--text); background: var(--surface2); }
+  .sidebar-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(79,142,247,0.08); }
+
+  .main {
+    flex: 1;
+    padding: 2rem 2.5rem;
+    max-width: 900px;
+  }
+
+  .level-block {
+    margin-bottom: 3rem;
+  }
+
+  .level-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .level-badge {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
+    letter-spacing: 0.06em;
+  }
+
+  .badge-l1 { background: rgba(52,211,153,0.15); color: var(--green); }
+  .badge-l2 { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .badge-l3 { background: rgba(167,139,250,0.15); color: var(--accent2); }
+  .badge-l5 { background: rgba(251,191,36,0.15);  color: var(--amber); }
+
+  .level-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  .block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .block:hover { border-color: #2e3547; }
+
+  .block-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 1rem;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .block-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .label-q    { color: var(--accent); }
+  .label-ddl  { color: var(--amber); }
+  .label-data { color: var(--green); }
+
+  .block-title {
+    font-size: 0.8rem;
+    color: var(--muted);
+    font-family: 'JetBrains Mono', monospace;
+    max-width: 60%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .copy-btn {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--muted);
+    font-size: 0.7rem;
+    font-family: 'JetBrains Mono', monospace;
+    padding: 0.25rem 0.6rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .copy-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+  .question-box {
+    padding: 0.75rem 1rem;
+    background: rgba(79,142,247,0.05);
+    border-bottom: 1px solid var(--border);
+    font-size: 0.82rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    font-style: italic;
+  }
+
+  .question-box strong { color: var(--accent); font-style: normal; }
+
+  pre {
+    margin: 0;
+    padding: 1rem 1.2rem;
+    overflow-x: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    line-height: 1.7;
+  }
+
+  /* Syntax highlighting */
+  .kw  { color: #7dd3fc; font-weight: 500; }   /* keywords */
+  .fn  { color: var(--accent2); }               /* functions */
+  .str { color: var(--green); }                 /* strings */
+  .num { color: var(--amber); }                 /* numbers */
+  .cmt { color: var(--comment); font-style: italic; } /* comments */
+  .op  { color: var(--cyan); }                  /* operators */
+  .tbl { color: #fb923c; }                      /* table/alias names */
+  .col { color: var(--text); }                  /* columns */
+  .punc{ color: var(--muted); }                 /* punctuation */
+
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>⚡ SQL Interview Prep</h1>
+  <span>MySQL · Levels 1 → 5</span>
+</header>
+
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-section">
+    <div class="sidebar-label">Levels</div>
+    <a class="sidebar-item active" onclick="scrollTo('l1')">Level 1 — Basics</a>
+    <a class="sidebar-item" onclick="scrollTo('l2')">Level 2 — Aggregates</a>
+    <a class="sidebar-item" onclick="scrollTo('l3')">Level 3 — Joins</a>
+    <a class="sidebar-item" onclick="scrollTo('l5')">Level 5 — Window Fns</a>
+  </div>
+  <div class="sidebar-section" style="margin-top:1rem">
+    <div class="sidebar-label">Tables</div>
+    <a class="sidebar-item" onclick="scrollTo('l1')">employees</a>
+    <a class="sidebar-item" onclick="scrollTo('l2')">orders</a>
+    <a class="sidebar-item" onclick="scrollTo('l3')">emp · departments</a>
+    <a class="sidebar-item" onclick="scrollTo('l5')">products · customers · sales</a>
+  </div>
+</nav>
+
+<main class="main">
+
+<!-- SETUP -->
+<div class="level-block">
+  <div class="level-header">
+    <span class="level-badge badge-data" style="background:rgba(52,211,153,0.1);color:#34d399">DDL</span>
+    <span class="level-title">Database Setup</span>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-data">Setup</span>
+      <span class="block-title">drop / create / use prep</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <pre><span class="kw">DROP DATABASE IF EXISTS</span> <span class="tbl">prep</span><span class="punc">;</span>
+<span class="kw">CREATE DATABASE</span> <span class="tbl">prep</span><span class="punc">;</span>
+<span class="kw">USE</span> <span class="tbl">prep</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-ddl">DDL</span>
+      <span class="block-title">CREATE TABLE employees</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <pre><span class="kw">CREATE TABLE</span> <span class="tbl">employees</span> <span class="punc">(</span>
+    <span class="col">employee_id</span> <span class="kw">INT PRIMARY KEY</span><span class="punc">,</span>
+    <span class="col">first_name</span>  <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">last_name</span>   <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">department</span>  <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">salary</span>      <span class="fn">DECIMAL</span><span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="num">2</span><span class="punc">),</span>
+    <span class="col">city</span>        <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">hire_date</span>   <span class="kw">DATE</span>
+<span class="punc">);</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-data">DML</span>
+      <span class="block-title">INSERT INTO employees (15 rows)</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <pre><span class="kw">INSERT INTO</span> <span class="tbl">employees</span> <span class="punc">(</span><span class="col">employee_id</span><span class="punc">,</span> <span class="col">first_name</span><span class="punc">,</span> <span class="col">last_name</span><span class="punc">,</span> <span class="col">department</span><span class="punc">,</span> <span class="col">salary</span><span class="punc">,</span> <span class="col">city</span><span class="punc">,</span> <span class="col">hire_date</span><span class="punc">)</span> <span class="kw">VALUES</span>
+<span class="punc">(</span><span class="num">1</span><span class="punc">,</span>  <span class="str">'Arjun'</span><span class="punc">,</span>     <span class="str">'Sharma'</span><span class="punc">,</span>  <span class="str">'Engineering'</span><span class="punc">,</span> <span class="num">95000</span><span class="punc">,</span>  <span class="str">'Pune'</span><span class="punc">,</span>      <span class="str">'2021-03-15'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">2</span><span class="punc">,</span>  <span class="str">'Priya'</span><span class="punc">,</span>     <span class="str">'Mehta'</span><span class="punc">,</span>   <span class="str">'Marketing'</span><span class="punc">,</span>   <span class="num">72000</span><span class="punc">,</span>  <span class="str">'Mumbai'</span><span class="punc">,</span>    <span class="str">'2020-07-22'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">3</span><span class="punc">,</span>  <span class="str">'Rohan'</span><span class="punc">,</span>     <span class="str">'Verma'</span><span class="punc">,</span>   <span class="str">'Engineering'</span><span class="punc">,</span> <span class="num">110000</span><span class="punc">,</span> <span class="str">'Bangalore'</span><span class="punc">,</span> <span class="str">'2019-11-01'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">4</span><span class="punc">,</span>  <span class="str">'Sneha'</span><span class="punc">,</span>     <span class="str">'Iyer'</span><span class="punc">,</span>    <span class="str">'HR'</span><span class="punc">,</span>          <span class="num">58000</span><span class="punc">,</span>  <span class="str">'Chennai'</span><span class="punc">,</span>   <span class="str">'2022-01-10'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">5</span><span class="punc">,</span>  <span class="str">'Vikram'</span><span class="punc">,</span>    <span class="str">'Nair'</span><span class="punc">,</span>    <span class="str">'Engineering'</span><span class="punc">,</span> <span class="num">98000</span><span class="punc">,</span>  <span class="str">'Pune'</span><span class="punc">,</span>      <span class="str">'2021-06-30'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">6</span><span class="punc">,</span>  <span class="str">'Ananya'</span><span class="punc">,</span>    <span class="str">'Das'</span><span class="punc">,</span>     <span class="str">'Finance'</span><span class="punc">,</span>     <span class="num">84000</span><span class="punc">,</span>  <span class="str">'Kolkata'</span><span class="punc">,</span>   <span class="str">'2020-09-14'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">7</span><span class="punc">,</span>  <span class="str">'Karan'</span><span class="punc">,</span>     <span class="str">'Patel'</span><span class="punc">,</span>   <span class="str">'Marketing'</span><span class="punc">,</span>   <span class="num">67000</span><span class="punc">,</span>  <span class="str">'Mumbai'</span><span class="punc">,</span>    <span class="str">'2023-02-18'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">8</span><span class="punc">,</span>  <span class="str">'Divya'</span><span class="punc">,</span>     <span class="str">'Rao'</span><span class="punc">,</span>     <span class="str">'Engineering'</span><span class="punc">,</span> <span class="num">120000</span><span class="punc">,</span> <span class="str">'Bangalore'</span><span class="punc">,</span> <span class="str">'2018-05-05'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">9</span><span class="punc">,</span>  <span class="str">'Amit'</span><span class="punc">,</span>      <span class="str">'Joshi'</span><span class="punc">,</span>   <span class="str">'Finance'</span><span class="punc">,</span>     <span class="num">91000</span><span class="punc">,</span>  <span class="str">'Pune'</span><span class="punc">,</span>      <span class="str">'2021-12-20'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="str">'Neha'</span><span class="punc">,</span>      <span class="str">'Gupta'</span><span class="punc">,</span>   <span class="str">'HR'</span><span class="punc">,</span>          <span class="num">54000</span><span class="punc">,</span>  <span class="str">'Delhi'</span><span class="punc">,</span>     <span class="str">'2022-08-03'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">11</span><span class="punc">,</span> <span class="str">'Rahul'</span><span class="punc">,</span>     <span class="str">'Kapoor'</span><span class="punc">,</span>  <span class="str">'Engineering'</span><span class="punc">,</span> <span class="num">105000</span><span class="punc">,</span> <span class="str">'Bangalore'</span><span class="punc">,</span> <span class="str">'2020-04-17'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">12</span><span class="punc">,</span> <span class="str">'Pooja'</span><span class="punc">,</span>     <span class="str">'Singh'</span><span class="punc">,</span>   <span class="str">'Marketing'</span><span class="punc">,</span>   <span class="num">75000</span><span class="punc">,</span>  <span class="str">'Delhi'</span><span class="punc">,</span>     <span class="str">'2019-10-29'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">13</span><span class="punc">,</span> <span class="str">'Siddharth'</span><span class="punc">,</span> <span class="str">'Kumar'</span><span class="punc">,</span>   <span class="str">'Finance'</span><span class="punc">,</span>     <span class="num">88000</span><span class="punc">,</span>  <span class="str">'Mumbai'</span><span class="punc">,</span>    <span class="str">'2021-07-11'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">14</span><span class="punc">,</span> <span class="str">'Kavya'</span><span class="punc">,</span>     <span class="str">'Reddy'</span><span class="punc">,</span>   <span class="str">'Engineering'</span><span class="punc">,</span> <span class="num">115000</span><span class="punc">,</span> <span class="str">'Hyderabad'</span><span class="punc">,</span> <span class="str">'2017-03-22'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">15</span><span class="punc">,</span> <span class="str">'Manish'</span><span class="punc">,</span>    <span class="str">'Tiwari'</span><span class="punc">,</span>  <span class="str">'HR'</span><span class="punc">,</span>          <span class="num">61000</span><span class="punc">,</span>  <span class="str">'Delhi'</span><span class="punc">,</span>     <span class="str">'2023-05-09'</span><span class="punc">);</span></pre>
+  </div>
+</div>
+
+<!-- LEVEL 1 -->
+<div class="level-block" id="l1">
+  <div class="level-header">
+    <span class="level-badge badge-l1">Level 1</span>
+    <span class="level-title">SELECT · WHERE · ORDER BY · LIMIT · DISTINCT</span>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q1</span>
+      <span class="block-title">Top 5 Engineering salaries</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Retrieve the <strong>first name, last name, and salary</strong> of employees in the Engineering department, ordered by salary descending. Return only top 5.</div>
+    <pre><span class="kw">SELECT</span> <span class="col">first_name</span><span class="punc">,</span> <span class="col">last_name</span><span class="punc">,</span> <span class="col">salary</span>
+<span class="kw">FROM</span>   <span class="tbl">employees</span>
+<span class="kw">WHERE</span>  <span class="col">department</span> <span class="op">=</span> <span class="str">'Engineering'</span>
+<span class="kw">ORDER  BY</span> <span class="col">salary</span> <span class="kw">DESC</span>
+<span class="kw">LIMIT</span>  <span class="num">5</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-ddl">ALTER</span>
+      <span class="block-title">Add is_active column</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Add a column <strong>is_active</strong> of type TINYINT(1) with a default value of 1.</div>
+    <pre><span class="kw">ALTER TABLE</span> <span class="tbl">employees</span>
+<span class="kw">ADD COLUMN</span> <span class="col">is_active</span> <span class="fn">TINYINT</span><span class="punc">(</span><span class="num">1</span><span class="punc">)</span> <span class="kw">DEFAULT</span> <span class="num">1</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q2</span>
+      <span class="block-title">Distinct cities</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Retrieve all <strong>distinct cities</strong> where employees are located, sorted alphabetically ascending.</div>
+    <pre><span class="kw">SELECT DISTINCT</span> <span class="col">city</span>
+<span class="kw">FROM</span>   <span class="tbl">employees</span>
+<span class="kw">ORDER  BY</span> <span class="col">city</span> <span class="kw">ASC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q3</span>
+      <span class="block-title">Full name + salary &lt; 70k</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Retrieve <strong>full name</strong> (as one column), department, and salary of employees earning less than 70,000, sorted by salary ascending.</div>
+    <pre><span class="kw">SELECT</span> <span class="fn">CONCAT_WS</span><span class="punc">(</span><span class="str">' '</span><span class="punc">,</span> <span class="col">first_name</span><span class="punc">,</span> <span class="col">last_name</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">full_name</span><span class="punc">,</span>
+       <span class="col">department</span><span class="punc">,</span>
+       <span class="col">salary</span>
+<span class="kw">FROM</span>   <span class="tbl">employees</span>
+<span class="kw">WHERE</span>  <span class="col">salary</span> <span class="op">&lt;</span> <span class="num">70000</span>
+<span class="kw">ORDER  BY</span> <span class="col">salary</span> <span class="kw">ASC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-ddl">ALTER</span>
+      <span class="block-title">Modify salary — NOT NULL + CHECK</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Modify the <strong>salary</strong> column to be NOT NULL and add a CHECK constraint (salary &gt; 0).</div>
+    <pre><span class="kw">ALTER TABLE</span> <span class="tbl">employees</span>
+<span class="kw">MODIFY COLUMN</span> <span class="col">salary</span> <span class="fn">DECIMAL</span><span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="num">2</span><span class="punc">)</span> <span class="kw">NOT NULL CHECK</span> <span class="punc">(</span><span class="col">salary</span> <span class="op">&gt;</span> <span class="num">0</span><span class="punc">);</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q4</span>
+      <span class="block-title">Sort by dept then hire_date</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Retrieve first name, department, and hire date of all employees, sorted by <strong>department ascending</strong>, then <strong>hire date ascending</strong>.</div>
+    <pre><span class="kw">SELECT</span> <span class="col">first_name</span><span class="punc">,</span>
+       <span class="col">department</span><span class="punc">,</span>
+       <span class="col">hire_date</span>
+<span class="kw">FROM</span>   <span class="tbl">employees</span>
+<span class="kw">ORDER  BY</span> <span class="col">department</span> <span class="kw">ASC</span><span class="punc">,</span>
+          <span class="col">hire_date</span>  <span class="kw">ASC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q5</span>
+      <span class="block-title">Total employee count</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Retrieve the <strong>total number of employees</strong>. Label the column as total_employees.</div>
+    <pre><span class="kw">SELECT</span> <span class="fn">COUNT</span><span class="punc">(*)</span> <span class="kw">AS</span> <span class="col">total_employees</span>
+<span class="kw">FROM</span>   <span class="tbl">employees</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-ddl">ALTER</span>
+      <span class="block-title">Rename city → location</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Rename the column <strong>city</strong> to <strong>location</strong> and change its type to VARCHAR(100).</div>
+    <pre><span class="kw">ALTER TABLE</span> <span class="tbl">employees</span> <span class="kw">RENAME COLUMN</span> <span class="col">city</span> <span class="kw">TO</span> <span class="col">location</span><span class="punc">;</span>
+<span class="kw">ALTER TABLE</span> <span class="tbl">employees</span> <span class="kw">MODIFY COLUMN</span> <span class="col">location</span> <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">100</span><span class="punc">);</span></pre>
+  </div>
+</div>
+
+<!-- LEVEL 2 -->
+<div class="level-block" id="l2">
+  <div class="level-header">
+    <span class="level-badge badge-l2">Level 2</span>
+    <span class="level-title">Aggregate Functions · GROUP BY · HAVING</span>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-data">DDL + DML</span>
+      <span class="block-title">CREATE + INSERT orders</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <pre><span class="kw">CREATE TABLE</span> <span class="tbl">orders</span> <span class="punc">(</span>
+    <span class="col">order_id</span>      <span class="kw">INT PRIMARY KEY</span><span class="punc">,</span>
+    <span class="col">customer_name</span> <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">product</span>       <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">category</span>      <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">quantity</span>      <span class="kw">INT</span><span class="punc">,</span>
+    <span class="col">unit_price</span>    <span class="fn">DECIMAL</span><span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="num">2</span><span class="punc">),</span>
+    <span class="col">order_date</span>    <span class="kw">DATE</span><span class="punc">,</span>
+    <span class="col">status</span>        <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">20</span><span class="punc">)</span>
+<span class="punc">);</span>
+
+<span class="kw">INSERT INTO</span> <span class="tbl">orders</span> <span class="kw">VALUES</span>
+<span class="punc">(</span><span class="num">1</span><span class="punc">,</span>  <span class="str">'Arjun'</span><span class="punc">,</span>     <span class="str">'Laptop'</span><span class="punc">,</span>     <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">2</span><span class="punc">,</span> <span class="num">55000</span><span class="punc">,</span> <span class="str">'2024-01-05'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">2</span><span class="punc">,</span>  <span class="str">'Priya'</span><span class="punc">,</span>     <span class="str">'Phone'</span><span class="punc">,</span>      <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">1</span><span class="punc">,</span> <span class="num">25000</span><span class="punc">,</span> <span class="str">'2024-01-10'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">3</span><span class="punc">,</span>  <span class="str">'Rohan'</span><span class="punc">,</span>     <span class="str">'Desk Chair'</span><span class="punc">,</span> <span class="str">'Furniture'</span><span class="punc">,</span>   <span class="num">3</span><span class="punc">,</span> <span class="num">8000</span><span class="punc">,</span>  <span class="str">'2024-01-15'</span><span class="punc">,</span> <span class="str">'cancelled'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">4</span><span class="punc">,</span>  <span class="str">'Sneha'</span><span class="punc">,</span>     <span class="str">'Laptop'</span><span class="punc">,</span>     <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">1</span><span class="punc">,</span> <span class="num">55000</span><span class="punc">,</span> <span class="str">'2024-02-01'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">5</span><span class="punc">,</span>  <span class="str">'Vikram'</span><span class="punc">,</span>    <span class="str">'Bookshelf'</span><span class="punc">,</span>  <span class="str">'Furniture'</span><span class="punc">,</span>   <span class="num">2</span><span class="punc">,</span> <span class="num">5000</span><span class="punc">,</span>  <span class="str">'2024-02-10'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">6</span><span class="punc">,</span>  <span class="str">'Ananya'</span><span class="punc">,</span>    <span class="str">'Phone'</span><span class="punc">,</span>      <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">3</span><span class="punc">,</span> <span class="num">25000</span><span class="punc">,</span> <span class="str">'2024-02-14'</span><span class="punc">,</span> <span class="str">'pending'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">7</span><span class="punc">,</span>  <span class="str">'Karan'</span><span class="punc">,</span>     <span class="str">'Monitor'</span><span class="punc">,</span>    <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">2</span><span class="punc">,</span> <span class="num">15000</span><span class="punc">,</span> <span class="str">'2024-03-01'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">8</span><span class="punc">,</span>  <span class="str">'Divya'</span><span class="punc">,</span>     <span class="str">'Desk Chair'</span><span class="punc">,</span> <span class="str">'Furniture'</span><span class="punc">,</span>   <span class="num">1</span><span class="punc">,</span> <span class="num">8000</span><span class="punc">,</span>  <span class="str">'2024-03-05'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">9</span><span class="punc">,</span>  <span class="str">'Amit'</span><span class="punc">,</span>      <span class="str">'Keyboard'</span><span class="punc">,</span>   <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">5</span><span class="punc">,</span> <span class="num">2000</span><span class="punc">,</span>  <span class="str">'2024-03-10'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="str">'Neha'</span><span class="punc">,</span>      <span class="str">'Laptop'</span><span class="punc">,</span>     <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">1</span><span class="punc">,</span> <span class="num">55000</span><span class="punc">,</span> <span class="str">'2024-03-22'</span><span class="punc">,</span> <span class="str">'cancelled'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">11</span><span class="punc">,</span> <span class="str">'Rahul'</span><span class="punc">,</span>     <span class="str">'Bookshelf'</span><span class="punc">,</span>  <span class="str">'Furniture'</span><span class="punc">,</span>   <span class="num">4</span><span class="punc">,</span> <span class="num">5000</span><span class="punc">,</span>  <span class="str">'2024-04-01'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">12</span><span class="punc">,</span> <span class="str">'Pooja'</span><span class="punc">,</span>     <span class="str">'Monitor'</span><span class="punc">,</span>    <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">1</span><span class="punc">,</span> <span class="num">15000</span><span class="punc">,</span> <span class="str">'2024-04-05'</span><span class="punc">,</span> <span class="str">'pending'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">13</span><span class="punc">,</span> <span class="str">'Siddharth'</span><span class="punc">,</span> <span class="str">'Keyboard'</span><span class="punc">,</span>   <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">3</span><span class="punc">,</span> <span class="num">2000</span><span class="punc">,</span>  <span class="str">'2024-04-10'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">14</span><span class="punc">,</span> <span class="str">'Kavya'</span><span class="punc">,</span>     <span class="str">'Desk Chair'</span><span class="punc">,</span> <span class="str">'Furniture'</span><span class="punc">,</span>   <span class="num">2</span><span class="punc">,</span> <span class="num">8000</span><span class="punc">,</span>  <span class="str">'2024-04-18'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">15</span><span class="punc">,</span> <span class="str">'Manish'</span><span class="punc">,</span>    <span class="str">'Phone'</span><span class="punc">,</span>      <span class="str">'Electronics'</span><span class="punc">,</span> <span class="num">2</span><span class="punc">,</span> <span class="num">25000</span><span class="punc">,</span> <span class="str">'2024-05-02'</span><span class="punc">,</span> <span class="str">'completed'</span><span class="punc">);</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q1</span>
+      <span class="block-title">Revenue per category (completed)</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Find <strong>total revenue per category</strong> for completed orders only, sorted by total revenue descending.</div>
+    <pre><span class="kw">SELECT</span> <span class="col">category</span><span class="punc">,</span>
+       <span class="fn">SUM</span><span class="punc">(</span><span class="col">quantity</span> <span class="op">*</span> <span class="col">unit_price</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">total_revenue</span>
+<span class="kw">FROM</span>   <span class="tbl">orders</span>
+<span class="kw">WHERE</span>  <span class="col">status</span> <span class="op">=</span> <span class="str">'completed'</span>
+<span class="kw">GROUP  BY</span> <span class="col">category</span>
+<span class="kw">ORDER  BY</span> <span class="col">total_revenue</span> <span class="kw">DESC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q2</span>
+      <span class="block-title">High-demand products (qty &gt; 5)</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Find all products where <strong>total quantity ordered &gt; 5</strong>. Show product and total_quantity, sorted descending.</div>
+    <pre><span class="kw">SELECT</span> <span class="col">product</span><span class="punc">,</span>
+       <span class="fn">SUM</span><span class="punc">(</span><span class="col">quantity</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">total_quantity</span>
+<span class="kw">FROM</span>   <span class="tbl">orders</span>
+<span class="kw">GROUP  BY</span> <span class="col">product</span>
+<span class="kw">HAVING</span> <span class="fn">SUM</span><span class="punc">(</span><span class="col">quantity</span><span class="punc">)</span> <span class="op">&gt;</span> <span class="num">5</span>
+<span class="kw">ORDER  BY</span> <span class="col">total_quantity</span> <span class="kw">DESC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q3</span>
+      <span class="block-title">Monthly sales summary</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Find <strong>total revenue and order count per month</strong> for completed orders only. Sort by month ascending.</div>
+    <pre><span class="kw">SELECT</span> <span class="fn">EXTRACT</span><span class="punc">(</span><span class="kw">MONTH FROM</span> <span class="col">order_date</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">month</span><span class="punc">,</span>
+       <span class="fn">COUNT</span><span class="punc">(*)</span>                        <span class="kw">AS</span> <span class="col">total_orders</span><span class="punc">,</span>
+       <span class="fn">SUM</span><span class="punc">(</span><span class="col">unit_price</span> <span class="op">*</span> <span class="col">quantity</span><span class="punc">)</span>      <span class="kw">AS</span> <span class="col">total_revenue</span>
+<span class="kw">FROM</span>   <span class="tbl">orders</span>
+<span class="kw">WHERE</span>  <span class="col">status</span> <span class="op">=</span> <span class="str">'completed'</span>
+<span class="kw">GROUP  BY</span> <span class="fn">EXTRACT</span><span class="punc">(</span><span class="kw">MONTH FROM</span> <span class="col">order_date</span><span class="punc">)</span>
+<span class="kw">ORDER  BY</span> <span class="col">month</span> <span class="kw">ASC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q4</span>
+      <span class="block-title">Avg order value &gt; 30k</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Find categories where <strong>average order value &gt; 30,000</strong>. Show category and avg_order_value, sorted descending.</div>
+    <pre><span class="kw">SELECT</span> <span class="col">category</span><span class="punc">,</span>
+       <span class="fn">AVG</span><span class="punc">(</span><span class="col">quantity</span> <span class="op">*</span> <span class="col">unit_price</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">avg_order_value</span>
+<span class="kw">FROM</span>   <span class="tbl">orders</span>
+<span class="kw">GROUP  BY</span> <span class="col">category</span>
+<span class="kw">HAVING</span> <span class="fn">AVG</span><span class="punc">(</span><span class="col">quantity</span> <span class="op">*</span> <span class="col">unit_price</span><span class="punc">)</span> <span class="op">&gt;</span> <span class="num">30000</span>
+<span class="kw">ORDER  BY</span> <span class="col">avg_order_value</span><span class="punc">;</span></pre>
+  </div>
+</div>
+
+<!-- LEVEL 3 -->
+<div class="level-block" id="l3">
+  <div class="level-header">
+    <span class="level-badge badge-l3">Level 3</span>
+    <span class="level-title">INNER JOIN · LEFT JOIN · SELF JOIN</span>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-data">DDL + DML</span>
+      <span class="block-title">CREATE + INSERT emp · departments</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <pre><span class="kw">CREATE TABLE</span> <span class="tbl">departments</span> <span class="punc">(</span>
+    <span class="col">dept_id</span>    <span class="kw">INT PRIMARY KEY</span><span class="punc">,</span>
+    <span class="col">dept_name</span>  <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">manager_id</span> <span class="kw">INT</span>
+<span class="punc">);</span>
+
+<span class="kw">CREATE TABLE</span> <span class="tbl">emp</span> <span class="punc">(</span>
+    <span class="col">emp_id</span>     <span class="kw">INT PRIMARY KEY</span><span class="punc">,</span>
+    <span class="col">name</span>       <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">dept_id</span>    <span class="kw">INT</span><span class="punc">,</span>
+    <span class="col">salary</span>     <span class="fn">DECIMAL</span><span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="num">2</span><span class="punc">),</span>
+    <span class="col">manager_id</span> <span class="kw">INT</span>
+<span class="punc">);</span>
+
+<span class="kw">INSERT INTO</span> <span class="tbl">departments</span> <span class="kw">VALUES</span>
+<span class="punc">(</span><span class="num">1</span><span class="punc">,</span> <span class="str">'Engineering'</span><span class="punc">,</span> <span class="num">3</span><span class="punc">),</span> <span class="punc">(</span><span class="num">2</span><span class="punc">,</span> <span class="str">'Marketing'</span><span class="punc">,</span> <span class="num">7</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">3</span><span class="punc">,</span> <span class="str">'HR'</span><span class="punc">,</span> <span class="num">10</span><span class="punc">),</span>         <span class="punc">(</span><span class="num">4</span><span class="punc">,</span> <span class="str">'Finance'</span><span class="punc">,</span> <span class="num">6</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">5</span><span class="punc">,</span> <span class="str">'Sales'</span><span class="punc">,</span> <span class="kw">NULL</span><span class="punc">);</span>
+
+<span class="kw">INSERT INTO</span> <span class="tbl">emp</span> <span class="kw">VALUES</span>
+<span class="punc">(</span><span class="num">1</span><span class="punc">,</span>  <span class="str">'Arjun'</span><span class="punc">,</span>     <span class="num">1</span><span class="punc">,</span> <span class="num">95000</span><span class="punc">,</span>  <span class="num">3</span><span class="punc">),</span>  <span class="punc">(</span><span class="num">2</span><span class="punc">,</span>  <span class="str">'Priya'</span><span class="punc">,</span>     <span class="num">2</span><span class="punc">,</span> <span class="num">72000</span><span class="punc">,</span>  <span class="num">7</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">3</span><span class="punc">,</span>  <span class="str">'Rohan'</span><span class="punc">,</span>     <span class="num">1</span><span class="punc">,</span> <span class="num">110000</span><span class="punc">,</span> <span class="kw">NULL</span><span class="punc">),</span> <span class="punc">(</span><span class="num">4</span><span class="punc">,</span>  <span class="str">'Sneha'</span><span class="punc">,</span>     <span class="num">3</span><span class="punc">,</span> <span class="num">58000</span><span class="punc">,</span>  <span class="num">10</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">5</span><span class="punc">,</span>  <span class="str">'Vikram'</span><span class="punc">,</span>    <span class="num">1</span><span class="punc">,</span> <span class="num">98000</span><span class="punc">,</span>  <span class="num">3</span><span class="punc">),</span>  <span class="punc">(</span><span class="num">6</span><span class="punc">,</span>  <span class="str">'Ananya'</span><span class="punc">,</span>    <span class="num">4</span><span class="punc">,</span> <span class="num">84000</span><span class="punc">,</span>  <span class="kw">NULL</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">7</span><span class="punc">,</span>  <span class="str">'Karan'</span><span class="punc">,</span>     <span class="num">2</span><span class="punc">,</span> <span class="num">67000</span><span class="punc">,</span>  <span class="kw">NULL</span><span class="punc">),</span> <span class="punc">(</span><span class="num">8</span><span class="punc">,</span>  <span class="str">'Divya'</span><span class="punc">,</span>     <span class="num">1</span><span class="punc">,</span> <span class="num">120000</span><span class="punc">,</span> <span class="num">3</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">9</span><span class="punc">,</span>  <span class="str">'Amit'</span><span class="punc">,</span>      <span class="num">4</span><span class="punc">,</span> <span class="num">91000</span><span class="punc">,</span>  <span class="num">6</span><span class="punc">),</span>  <span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="str">'Neha'</span><span class="punc">,</span>      <span class="num">3</span><span class="punc">,</span> <span class="num">54000</span><span class="punc">,</span>  <span class="kw">NULL</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">11</span><span class="punc">,</span> <span class="str">'Rahul'</span><span class="punc">,</span>     <span class="num">1</span><span class="punc">,</span> <span class="num">105000</span><span class="punc">,</span> <span class="num">3</span><span class="punc">),</span>  <span class="punc">(</span><span class="num">12</span><span class="punc">,</span> <span class="str">'Pooja'</span><span class="punc">,</span>     <span class="num">2</span><span class="punc">,</span> <span class="num">75000</span><span class="punc">,</span>  <span class="num">7</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">13</span><span class="punc">,</span> <span class="str">'Siddharth'</span><span class="punc">,</span> <span class="num">4</span><span class="punc">,</span> <span class="num">88000</span><span class="punc">,</span>  <span class="num">6</span><span class="punc">),</span>  <span class="punc">(</span><span class="num">14</span><span class="punc">,</span> <span class="str">'Kavya'</span><span class="punc">,</span>     <span class="num">1</span><span class="punc">,</span> <span class="num">115000</span><span class="punc">,</span> <span class="num">3</span><span class="punc">),</span>
+<span class="punc">(</span><span class="num">15</span><span class="punc">,</span> <span class="str">'Manish'</span><span class="punc">,</span>    <span class="num">3</span><span class="punc">,</span> <span class="num">61000</span><span class="punc">,</span>  <span class="num">10</span><span class="punc">);</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q1</span>
+      <span class="block-title">INNER JOIN — emp + departments</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Retrieve <strong>employee name, salary and department name</strong> for all employees that belong to a department. Sort by department name ascending.</div>
+    <pre><span class="kw">SELECT</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">name</span><span class="punc">,</span>
+       <span class="tbl">e</span><span class="punc">.</span><span class="col">salary</span><span class="punc">,</span>
+       <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_name</span>
+<span class="kw">FROM</span>   <span class="tbl">emp</span> <span class="tbl">e</span>
+       <span class="kw">INNER JOIN</span> <span class="tbl">departments</span> <span class="tbl">d</span> <span class="kw">ON</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">dept_id</span> <span class="op">=</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_id</span>
+<span class="kw">ORDER  BY</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_name</span> <span class="kw">ASC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q2</span>
+      <span class="block-title">LEFT JOIN — include unassigned employees</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Retrieve all employees names and their department name. If an employee has <strong>no department, show NULL</strong>. Sort by employee name ascending.</div>
+    <pre><span class="kw">SELECT</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">name</span><span class="punc">,</span>
+       <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_name</span>
+<span class="kw">FROM</span>   <span class="tbl">emp</span> <span class="tbl">e</span>
+       <span class="kw">LEFT JOIN</span> <span class="tbl">departments</span> <span class="tbl">d</span> <span class="kw">ON</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">dept_id</span> <span class="op">=</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_id</span>
+<span class="kw">ORDER  BY</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">name</span> <span class="kw">ASC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q3</span>
+      <span class="block-title">SELF JOIN — employee + manager</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Retrieve each employee's name and their <strong>manager's name</strong>. Employees with no manager should still appear with NULL. Sort by employee name ascending.</div>
+    <pre><span class="kw">SELECT</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">name</span><span class="punc">,</span>
+       <span class="tbl">e1</span><span class="punc">.</span><span class="col">name</span> <span class="kw">AS</span> <span class="col">manager_name</span>
+<span class="kw">FROM</span>   <span class="tbl">emp</span> <span class="tbl">e</span>
+       <span class="kw">LEFT JOIN</span> <span class="tbl">emp</span> <span class="tbl">e1</span> <span class="kw">ON</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">manager_id</span> <span class="op">=</span> <span class="tbl">e1</span><span class="punc">.</span><span class="col">emp_id</span>
+<span class="kw">ORDER  BY</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">name</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-ddl">ALTER</span>
+      <span class="block-title">Add email column to emp</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Add an <strong>email</strong> column VARCHAR(100), unique, after the name column.</div>
+    <pre><span class="kw">ALTER TABLE</span> <span class="tbl">emp</span>
+<span class="kw">ADD COLUMN</span> <span class="col">email</span> <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">100</span><span class="punc">)</span> <span class="kw">DEFAULT NULL UNIQUE AFTER</span> <span class="col">name</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q4</span>
+      <span class="block-title">Dept headcount + avg salary</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Retrieve dept_name, total_employees, avg_salary for <strong>all departments including 0-employee ones</strong>. Round avg_salary to 2 decimal places.</div>
+    <pre><span class="kw">SELECT</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_name</span><span class="punc">,</span>
+       <span class="fn">SUM</span><span class="punc">(</span><span class="kw">CASE</span>
+               <span class="kw">WHEN</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">emp_id</span> <span class="kw">IS NULL THEN</span> <span class="num">0</span>
+               <span class="kw">ELSE</span> <span class="num">1</span>
+           <span class="kw">END</span><span class="punc">)</span>               <span class="kw">AS</span> <span class="col">total_employees</span><span class="punc">,</span>
+       <span class="fn">ROUND</span><span class="punc">(</span><span class="fn">AVG</span><span class="punc">(</span><span class="tbl">e</span><span class="punc">.</span><span class="col">salary</span><span class="punc">),</span> <span class="num">2</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">avg_salary</span>
+<span class="kw">FROM</span>   <span class="tbl">departments</span> <span class="tbl">d</span>
+       <span class="kw">LEFT JOIN</span> <span class="tbl">emp</span> <span class="tbl">e</span> <span class="kw">ON</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_id</span> <span class="op">=</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">dept_id</span>
+<span class="kw">GROUP  BY</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_id</span>
+<span class="kw">ORDER  BY</span> <span class="col">total_employees</span> <span class="kw">ASC</span><span class="punc">;</span></pre>
+  </div>
+</div>
+
+<!-- LEVEL 5 -->
+<div class="level-block" id="l5">
+  <div class="level-header">
+    <span class="level-badge badge-l5">Level 5</span>
+    <span class="level-title">Window Functions · RANK · DENSE_RANK · LAG · LEAD</span>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-data">DDL + DML</span>
+      <span class="block-title">CREATE + INSERT products · customers · sales</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <pre><span class="kw">CREATE TABLE</span> <span class="tbl">products</span> <span class="punc">(</span>
+    <span class="col">product_id</span> <span class="kw">INT PRIMARY KEY</span><span class="punc">,</span>
+    <span class="col">name</span>       <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">category</span>   <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">price</span>      <span class="fn">DECIMAL</span><span class="punc">(</span><span class="num">10</span><span class="punc">,</span> <span class="num">2</span><span class="punc">),</span>
+    <span class="col">stock</span>      <span class="kw">INT</span>
+<span class="punc">);</span>
+
+<span class="kw">CREATE TABLE</span> <span class="tbl">customers</span> <span class="punc">(</span>
+    <span class="col">customer_id</span> <span class="kw">INT PRIMARY KEY</span><span class="punc">,</span>
+    <span class="col">name</span>        <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">city</span>        <span class="fn">VARCHAR</span><span class="punc">(</span><span class="num">50</span><span class="punc">),</span>
+    <span class="col">joined_date</span> <span class="kw">DATE</span>
+<span class="punc">);</span>
+
+<span class="kw">CREATE TABLE</span> <span class="tbl">sales</span> <span class="punc">(</span>
+    <span class="col">sale_id</span>     <span class="kw">INT PRIMARY KEY</span><span class="punc">,</span>
+    <span class="col">customer_id</span> <span class="kw">INT</span><span class="punc">,</span>
+    <span class="col">product_id</span>  <span class="kw">INT</span><span class="punc">,</span>
+    <span class="col">quantity</span>    <span class="kw">INT</span><span class="punc">,</span>
+    <span class="col">sale_date</span>   <span class="kw">DATE</span><span class="punc">,</span>
+    <span class="kw">FOREIGN KEY</span> <span class="punc">(</span><span class="col">customer_id</span><span class="punc">)</span> <span class="kw">REFERENCES</span> <span class="tbl">customers</span> <span class="punc">(</span><span class="col">customer_id</span><span class="punc">),</span>
+    <span class="kw">FOREIGN KEY</span> <span class="punc">(</span><span class="col">product_id</span><span class="punc">)</span>  <span class="kw">REFERENCES</span> <span class="tbl">products</span>  <span class="punc">(</span><span class="col">product_id</span><span class="punc">)</span>
+<span class="punc">);</span>
+
+<span class="cmt">-- inserts omitted for brevity — use original INSERT statements</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q1</span>
+      <span class="block-title">RANK() salary within department</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">For each employee show name, dept_name, salary and <strong>RANK()</strong> within their department by salary descending. Sort by dept_name asc, rank asc.</div>
+    <pre><span class="kw">SELECT</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">name</span><span class="punc">,</span>
+       <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_name</span><span class="punc">,</span>
+       <span class="tbl">e</span><span class="punc">.</span><span class="col">salary</span><span class="punc">,</span>
+       <span class="fn">DENSE_RANK</span><span class="punc">()</span> <span class="kw">OVER</span> <span class="punc">(</span><span class="kw">PARTITION BY</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_id</span> <span class="kw">ORDER BY</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">salary</span> <span class="kw">DESC</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">rank_number</span>
+<span class="kw">FROM</span>   <span class="tbl">emp</span> <span class="tbl">e</span>
+       <span class="kw">LEFT JOIN</span> <span class="tbl">departments</span> <span class="tbl">d</span> <span class="kw">ON</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">dept_id</span> <span class="op">=</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_id</span>
+<span class="kw">ORDER  BY</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_name</span> <span class="kw">ASC</span><span class="punc">,</span>
+          <span class="col">rank_number</span>    <span class="kw">ASC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q2</span>
+      <span class="block-title">DENSE_RANK() — no gaps</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Same as above but use <strong>DENSE_RANK()</strong> — no gaps in ranking for tied salaries.</div>
+    <pre><span class="kw">SELECT</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">name</span><span class="punc">,</span>
+       <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_name</span><span class="punc">,</span>
+       <span class="tbl">e</span><span class="punc">.</span><span class="col">salary</span><span class="punc">,</span>
+       <span class="fn">DENSE_RANK</span><span class="punc">()</span> <span class="kw">OVER</span> <span class="punc">(</span><span class="kw">PARTITION BY</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_id</span> <span class="kw">ORDER BY</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">salary</span> <span class="kw">DESC</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">rank_number</span>
+<span class="kw">FROM</span>   <span class="tbl">emp</span> <span class="tbl">e</span>
+       <span class="kw">LEFT JOIN</span> <span class="tbl">departments</span> <span class="tbl">d</span> <span class="kw">ON</span> <span class="tbl">e</span><span class="punc">.</span><span class="col">dept_id</span> <span class="op">=</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_id</span>
+<span class="kw">ORDER  BY</span> <span class="tbl">d</span><span class="punc">.</span><span class="col">dept_name</span> <span class="kw">ASC</span><span class="punc">,</span>
+          <span class="col">rank_number</span> <span class="kw">ASC</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q3</span>
+      <span class="block-title">LAG() — previous month revenue</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">Show each month, its total revenue, and <strong>the previous month's revenue</strong> using LAG(). Sort by month ascending.</div>
+    <pre><span class="kw">WITH</span> <span class="tbl">monthly_revenue</span> <span class="kw">AS</span> <span class="punc">(</span>
+    <span class="kw">SELECT</span> <span class="fn">EXTRACT</span><span class="punc">(</span><span class="kw">MONTH FROM</span> <span class="tbl">s</span><span class="punc">.</span><span class="col">sale_date</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">month</span><span class="punc">,</span>
+           <span class="fn">SUM</span><span class="punc">(</span><span class="tbl">s</span><span class="punc">.</span><span class="col">quantity</span> <span class="op">*</span> <span class="tbl">p</span><span class="punc">.</span><span class="col">price</span><span class="punc">)</span>        <span class="kw">AS</span> <span class="col">total_revenue</span>
+    <span class="kw">FROM</span>   <span class="tbl">sales</span> <span class="tbl">s</span>
+           <span class="kw">LEFT JOIN</span> <span class="tbl">products</span> <span class="tbl">p</span> <span class="kw">ON</span> <span class="tbl">s</span><span class="punc">.</span><span class="col">product_id</span> <span class="op">=</span> <span class="tbl">p</span><span class="punc">.</span><span class="col">product_id</span>
+    <span class="kw">GROUP  BY</span> <span class="col">month</span>
+<span class="punc">)</span>
+<span class="kw">SELECT</span> <span class="col">month</span><span class="punc">,</span>
+       <span class="col">total_revenue</span><span class="punc">,</span>
+       <span class="fn">LAG</span><span class="punc">(</span><span class="col">total_revenue</span><span class="punc">,</span> <span class="num">1</span><span class="punc">)</span> <span class="kw">OVER</span> <span class="punc">(</span><span class="kw">ORDER BY</span> <span class="col">month</span> <span class="kw">ASC</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">prev_month_revenue</span>
+<span class="kw">FROM</span>   <span class="tbl">monthly_revenue</span><span class="punc">;</span></pre>
+  </div>
+
+  <div class="block">
+    <div class="block-header">
+      <span class="block-label label-q">Q4</span>
+      <span class="block-title">LEAD() — next sale date per customer</span>
+      <button class="copy-btn" onclick="copyBlock(this)">copy</button>
+    </div>
+    <div class="question-box">For each sale show customer name, sale_date, and the <strong>next sale date</strong> for that customer using LEAD(). Sort by customer name asc, sale_date asc.</div>
+    <pre><span class="kw">SELECT</span> <span class="tbl">c</span><span class="punc">.</span><span class="col">name</span><span class="punc">,</span>
+       <span class="tbl">s</span><span class="punc">.</span><span class="col">sale_date</span><span class="punc">,</span>
+       <span class="fn">LEAD</span><span class="punc">(</span><span class="tbl">s</span><span class="punc">.</span><span class="col">sale_date</span><span class="punc">,</span> <span class="num">1</span><span class="punc">)</span> <span class="kw">OVER</span> <span class="punc">(</span><span class="kw">PARTITION BY</span> <span class="tbl">c</span><span class="punc">.</span><span class="col">name</span> <span class="kw">ORDER BY</span> <span class="tbl">s</span><span class="punc">.</span><span class="col">sale_date</span> <span class="kw">ASC</span><span class="punc">)</span> <span class="kw">AS</span> <span class="col">next_sale_date</span>
+<span class="kw">FROM</span>   <span class="tbl">sales</span>     <span class="tbl">s</span>
+       <span class="kw">INNER JOIN</span> <span class="tbl">customers</span> <span class="tbl">c</span> <span class="kw">ON</span> <span class="tbl">s</span><span class="punc">.</span><span class="col">customer_id</span> <span class="op">=</span> <span class="tbl">c</span><span class="punc">.</span><span class="col">customer_id</span>
+<span class="kw">ORDER  BY</span> <span class="tbl">c</span><span class="punc">.</span><span class="col">name</span>      <span class="kw">ASC</span><span class="punc">,</span>
+          <span class="tbl">s</span><span class="punc">.</s
